@@ -3,21 +3,21 @@ import {
   developmentChains,
   VOTING_DELAY,
   proposalsFile,
-  FUNC,
-  PROPOSAL_DESCRIPTION,
-  NEW_STORE_VALUE,
+  PROPOSAL_FUNC,
+  NEW_PROPOSAL_DESCRIPTION,
+  PROPOSAL_NAME,
 } from "../helper-hardhat-config"
 import * as fs from "fs"
 import { moveBlocks } from "../utils/move-blocks"
 
 export async function propose(args: any[], functionToCall: string, proposalDescription: string) {
   const governor = await ethers.getContract("GovernorContract")
-  const box = await ethers.getContract("Box")
-  const encodedFunctionCall = box.interface.encodeFunctionData(functionToCall, args)
-  console.log(`Proposing ${functionToCall} on ${box.address} with ${args}`)
+  const proposal = await ethers.getContract("Proposal")
+  const encodedFunctionCall = proposal.interface.encodeFunctionData(functionToCall, args)
+  console.log(`Proposing ${functionToCall} on ${proposal.address} with ${args}`)
   console.log(`Proposal Description:\n  ${proposalDescription}`)
   const proposeTx = await governor.propose(
-    [box.address],
+    [proposal.address],
     [0],
     [encodedFunctionCall],
     proposalDescription
@@ -58,7 +58,7 @@ function storeProposalId(proposalId: any) {
   fs.writeFileSync(proposalsFile, JSON.stringify(proposals), "utf8");
 }
 
-propose([NEW_STORE_VALUE], FUNC, PROPOSAL_DESCRIPTION)
+propose([PROPOSAL_NAME], PROPOSAL_FUNC, NEW_PROPOSAL_DESCRIPTION)
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error)
